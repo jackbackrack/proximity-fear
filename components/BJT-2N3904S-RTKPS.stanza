@@ -16,7 +16,7 @@ public pcb-module module :
   pin c
   pin e
   
-  inst bjt : database-part(["mpn" => "2N3904S-RTKPS", "manufacturer" => "KEC Semicon"])
+  inst bjt : database-part(["mpn" => "2N3904S-RTK/PS", "manufacturer" => "KEC Semicon"])
   net (bjt.B b)
   net (bjt.C c)
   net (bjt.E e)

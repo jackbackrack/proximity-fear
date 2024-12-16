@@ -59,9 +59,9 @@ val board-shape = boolean-union $ [RoundedRectangle(50.0, 52.0, 0.25, loc(-14.0,
 defn run-design (circuit:Instantiable, run-checks?:True|False) :
   ; set-paper(ANSI-A5)
   set-current-design("hackathon-2022")
-  set-bom-vendors([ JLCPCB ])
+  set-bom-vendors([ JLCPCB, DigiKey ])
   set-bom-design-quantity(0)
-  set-board(ocdb/utils/defaults/default-board(ocdb/manufacturers/stackups/jlcpcb-jlc2313-6layer, board-shape))
+  set-board(ocdb/utils/defaults/default-board(ocdb/manufacturers/stackups/jlcpcb-jlc2313, board-shape))
   set-rules(ocdb/manufacturers/rules/jlcpcb-rules)
 
   ; We may have to fix db-parts on the fly, and want people to get fixes automatically.
@@ -78,12 +78,12 @@ defn run-design (circuit:Instantiable, run-checks?:True|False) :
   if run-checks? :
     run-checks("checks.txt")
     view-design-explorer()
-    export-design()
+    ; export-design()
   else:  
     view-board()
-    ; view-schematic()
-    view-design-explorer()
-    export-design()
+    view-schematic()
+    ; view-design-explorer()
+    ; export-design()
 
 ; ; We want decoupling capacitors to be close to the component being decoupled
 ; defn bypass-cap-strap (power-pin:JITXObject, gnd-pin:JITXObject, params:Tuple<KeyValue>) -> JITXObject :
@@ -153,9 +153,7 @@ public pcb-module class-d-audio :
 ; ==========================
 public pcb-module buddha :
   ; USB
-  ;inst usb : usb2-on-a-usb-c-connector(ocdb/components/korean-hroparts-elec/TYPE-C-31-M-12/module(SinkDefault))
   inst usb : usb2-on-a-usb-c-connector(ocdb/components/korean-hroparts-elec/TYPE-C-31-M-23/module(SinkDefault))
-  ; inst usb : usb2-on-a-usb-c-connector()
   net GND (usb.usb-2.vbus.gnd)
   symbol(GND) = ground-sym
   property(GND.voltage) = typ(0.0)
@@ -168,6 +166,7 @@ public pcb-module buddha :
 
   ; Power - battery
   inst battery : database-part(["vendor_part_numbers.lcsc" => "C47647"])
+  ; inst battery : database-part(["mpn" => "PH-2P", "manufacturer" => "BOOMELE(Boom Precision Elec)"])
   net (battery.p[1] GND)
 
   ; battery charging
@@ -226,7 +225,6 @@ public pcb-module buddha :
   val white-rings = to-tuple $ for i in 0 to n-rings seq :
     val d = 30.0 + to-double(i) * 8.0
     val locs = to-tuple $ seq({ loc(10.0, 0.0, 0.0) * _ }, ring-locs(d, 5.0))
-    println("LOCS %_" % [length(locs)])
     add(ring-lens, length(locs))
     inst led-ring : leds(locs)
     led-ring
@@ -282,12 +280,6 @@ public pcb-module buddha :
   geom(P4V2) :
     ; copper-pour(LayerIndex(2), isolate = 0.1, rank = 1) = Rectangle(width(board-shape) - 1.0, height(board-shape) - 1.0)
     copper-pour(LayerIndex(2), isolate = 0.1, rank = 1) = operator-offset(board-shape, -1.0)
-  geom(GND) :
-    ; copper-pour(LayerIndex(3), isolate = 0.1, rank = 1) = Rectangle(width(board-shape) - 1.0, height(board-shape) - 1.0)
-    copper-pour(LayerIndex(3), isolate = 0.1, rank = 1) = operator-offset(board-shape, -1.0)
-  geom(P2V8) :
-    ; copper-pour(LayerIndex(4), isolate = 0.1, rank = 1) = Rectangle(width(board-shape) - 1.0, height(board-shape) - 1.0)
-    copper-pour(LayerIndex(4), isolate = 0.1, rank = 1) = operator-offset(board-shape, -1.0)
 
   ; set net classes for power
   val power-net-class = NetClass(`Power-HV, [`min-trace => 0.381])
